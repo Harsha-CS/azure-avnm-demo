@@ -1,0 +1,7 @@
+fetch_creds.sh
+.terraform.lock.hcl
+backend.conf
+iac/terraform/.terraform/terraform.tfvars
+modules.json
+terraform.tfstate
+iac/terraform/terraform.tfvars
