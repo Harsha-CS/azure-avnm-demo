@@ -10,7 +10,7 @@ An Azure Virtual Network Manager (Network Manager) instance is deployed to a reg
 
 The resource scope represents the subscription or subscriptions a Network Manager can manage. Resource scopes can include management groups to manage groups of subscriptions or individual subscriptions. Only one Network Manager can manage a specific scope at one time. The image below provides an example of how an organization could configure the resource scopes of Network Manager.
 
-![sample resource scopes](../images/sample-arch.png)
+![sample resource scopes](../images/sample_arch.png)
 
 The functional scope determines which types of configurations the Network Manager will support. There are two scopes for management of virtual networks which include Connectivity and SecurityAdmin. [Connectivity Configurations](https://learn.microsoft.com/en-us/azure/virtual-network-manager/concept-connectivity-configuration) are used to manage the desired state of the connectivity and [SecurityAdmin Configurations](https://learn.microsoft.com/en-us/azure/virtual-network-manager/concept-security-admins) are used to manage Security Rules for the virtual networks within the resource scope. Configurations are deployed to one or more Azure regions.
 
@@ -32,7 +32,7 @@ The visual below illustrates how Security Admin Rules work with Network Security
 
 ![rules processing](../images/processing.png)
 
-Before we see the rules in action, let's cover some practical use cases based upon the Security Admin Rule action.
+Before we see the rules in action, let's cover some practical use cases based upon the Security Admin Rule actions.
 
 * Deny
     * Protect high-risk ports **by default** for all new and existing virtual networks.
@@ -46,28 +46,94 @@ Before we see the rules in action, let's cover some practical use cases based up
 Let's take a look at Security Admin Rules in action.
 
 ## AlwaysAllow Demonstration
-In this scenario the organization wants to ensure DNS traffic cannot be mistakenly blocked by application teams. 
+In this scenario the organization's Central IT team must ensure that network traffic to critical infrastructure services cannot be mistakenly blocked by a misconfiguration. DNS is considered a critical infrastructure service for the organization and is provided by a 3rd-party DNS service hosted at 1.1.1.1. Let's look at how a security admin rule could help satisify this requirement.
 
 ![scenario 1](../images/d1-goal.png)
 
-Here we can observe the Network Security Group applied the virtual machine's subnet is denying outbound DNS traffic to the DNS service.
+The network security group configured by an application team has been configured to block DNS traffic to the organization's preferred DNS service as seen in the image below.
 
-![nsg rules](../images/d1-outbound-nsg.png)
+![nsg rules scenario 1](../images/d1-outbound-nsg.png)
 
-Performing a DNS lookup on the virtual machine using the DNS service shows a timeout as expected showing the Network Security Group security rule is currently in effect.
+When a DNS lookup is performed on the virtual machine directed to the DNS service the request times out due to it being blocked by the security rule configured in the network security group.
 
 ![dig fail](../images/d1-dig-deny.png)
 
-We now will deploy an AVNM Security Configuration to the virtual machine's region that contains a SecurityAdmin Rule Collection that has been associated to the Network Group the virtual machine's virtual network is a member of. This rule collection includes an AlwaysAllow rule for this traffic flow.
+The Central IT team creates an instance of Azure Virtual Network Manager and sets is resource scope to a management group which all of the application team subscriptions are children of. It then creates a new SecurityAdmin Configuration and adds a rule collection. The rule collection is associated with a network group that uses Azure Policy to manage the dynamic membership of the group based upon virtual networks containing the tag of environment=prod. Contained in this rule collection is a security admin rule which uses the Always Allow action to allow outbound DNS traffic destined to the organization's DNS service. 
 
-![dns security rule](../images/d1-sec-admin-rule.png)
+![d1-arch](../images/d1-arch.png)
 
-After the security configuration is applied, performing another DNS lookup to the DNS service comes back successful showing that the AlwaysAllow action supercedes Network Security Group rules.
+The Central IT team then deploys the new SecurityAdmin Configuration to the Azure relevant Azure regions. The virtual network which include the production tag will be onboarded into the production network group at the next Azure Policy enforcement. When completed, another test is performed showing that the DNS traffic is now allowed to the 3rd-party DNS service. 
 
 ![dig success](../images/d1-dig-success.png)
 
 ## Deny Demonstration
-In this scenario the organization wants to block HTTP traffic to virtual networks containing workloads which hold sensitive data. The organization has created a Security Admin Rule 
+In this scenario the organization has a requirement to ensure all web-based communication with production workloads that store or process sensitive data is encrypted. Production workloads that do not store or process sensitive data do not have the requirement and it should be enforced on those workloads. Let's take a look at how we can use multiple rule collections and network groups to assign security admin rules to a subset of machines. 
+
+![scenario 2](../images/d2-goal.png)
+
+A network security group has been configured by the application team to allow HTTP to a production workload storing sensitive data.
+
+![nsg rules scenario2](../images/d2-inbound-nsg.png)
+
+Performing a curl on the virtual machine from another endpoint returns the Hello World web page indicating the traffic is being allowed by the network security group.
+
+![curl success](../images/d2-curl-success.png)
+
+The Central IT team does not need to create another SecurityAdmin Configuration to satisfy this requirement. Instead, it uses the existing SecurityAdmin Configuration and creates a new rule collection that will block this encrypted network flow. The rule collection is associated with a new network group that uses Azure Policy to manage the dynamic membership of the group based upon the virtual networks containing the tag of environment=production and classification=sensitive. Contained in the rule collection is a security admin rule which uses the Deny action to block HTTP traffic. This new rule collection will only target production machines that contain the additional tag indicating it stores or processes sensitive data.
+
+![d2 arch](../images/d2-arch.png)
+
+The Central IT team then re-deploys the modified SecurityAdmin Configuration to the Azure relevant Azure regions. The application team's virtual network includes the matching classification tag and will be onboarded into the network group at the next Azure Policy enforcement.  When completed, inbound HTTP traffic to the sensitive virtual network is block. This demonstrates how an organization can block specific protocols by default to comply with the organization's security standards.
+
+![curl failure](../images/d2-curl-failure.png)
+
+## Allow Demonstration
+In this scenario the organization must ensure that SSH access to both production and non-production application team workloads is supported when coming from a trusted group of jump hosts but only if the application team requires it. Let's look at how an Allow and Deny security admin rule can be used in combination to allow for a traffic flow from a specific source while leaving it up to the application team to determine if that flow is required for their workload.
+
+![scenario 3](../images/d3-goal.png)
+
+The Central IT team will the existing SecurityAdmin configuration and production rule collection created in the first scenario. Another rule collection will be created for non-production workloads and associated to a new network group. The new network group will use Azure Policy to manage the dynamic membership of the group based upon the virtual networks having the tag of environment=nonproduction. The existing production rule collection will be modified to include a new Allow and Deny security admin rules for incoming SSH traffic. The new non-production rule collection will contain the same Allow and Deny security admin rules.
+
+![d3-arch](../images/d3-arch.png)
+
+The Central IT team then re-deploys the modified SecurityAdmin Configuration to the Azure relevant Azure regions. The application team's virtual network is tagged with an environment tag that has a value of production and has been onboarded into the production network group.  The newly added Allow and Deny security admin rules for SSH access will take effect.
+
+The application team has determined that it does not want to support inbound SSH traffic for its production workload. It has configured its network security group to block all inbound traffic except for HTTP traffic as seen below.
+
+![inbound nsg block ssh](../images/d3-nsg-inbound-deny.png)
+
+Attempts to SSH to resources within the non-production virtual network is denied because the network security group security rule.
+
+![ssh failure](../images/d3-ssh-fail.png)
+
+For non-production the application team would like to support SSH connections. However, they have allowed all sources. This is where the additional Deny security admin rule comes into play. This acts as a guardrail to restrict the machines that can SSH to the trusted jump servers.
+
+![inbound nsg allow ssh](../images/d3-nsg-inbound-all.png)
+
+SSH connections from the trusted jump hosts is allowed because both the security admin rules and network security groups allow the connection. Attempts any other source will be rejected because of the deny security admin rule.
+
+![ssh success](../images/d3-ssh-success.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
