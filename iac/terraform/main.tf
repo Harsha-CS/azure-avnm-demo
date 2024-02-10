@@ -186,8 +186,7 @@ module "vnet_mgmt" {
   location            = var.primary_location
   resource_group_name = azurerm_resource_group.rg_mgmt.name
 
-  # Add additional tag to use in Azure Policy demonstration
-  tags = merge(local.tags, { env = "prod" })
+  tags = local.tags
 
   law_resource_id = module.law_central.id
   address_space_vnet                = ["10.250.0.0/16"]
@@ -419,6 +418,18 @@ module "nsgs_pri_r1" {
       destination_address_prefix = "*"
     },
     {
+      name                       = "allow-http"
+      description                = "Allow HTTP from all sources"
+      priority                   = 1100
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "80"
+      source_address_prefixes    = "*"
+      destination_address_prefix = "*"
+    },
+    {
       name                       = "block-all"
       description                = "Block all traffic"
       priority                   = 4096
@@ -467,14 +478,14 @@ module "nsgnp_pri_r1" {
   security_rules = [
     {
       name                       = "allow-ssh"
-      description                = "Allow SSH from trusted IP"
+      description                = "Allow SSH from all sources"
       priority                   = 1000
       direction                  = "Inbound"
       access                     = "Allow"
       protocol                   = "Tcp"
       source_port_range          = "*"
       destination_port_range     = "22"
-      source_address_prefixes    = [module.pip_vm1_mgmt.ip_address]
+      source_address_prefixes    = "*"
       destination_address_prefix = "*"
     },
     {
@@ -527,14 +538,14 @@ module "nsgnp_pri_r2" {
   security_rules = [
     {
       name                       = "allow-ssh"
-      description                = "Allow SSH from trusted IP"
+      description                = "Allow SSH from all sources"
       priority                   = 1000
       direction                  = "Inbound"
       access                     = "Allow"
       protocol                   = "Tcp"
       source_port_range          = "*"
       destination_port_range     = "22"
-      source_address_prefixes    = [module.pip_vm1_mgmt.ip_address]
+      source_address_prefixes    = "*"
       destination_address_prefix = "*"
     },
     {
@@ -620,7 +631,9 @@ module "vnets_r1" {
   name                = "vnets-r1${random_string.unique.result}"
   location            = var.primary_location
   resource_group_name = azurerm_resource_group.rg_s.name
-  tags                = local.tags
+  tags = merge(local.tags, { 
+    env = "prod",
+    classification = "sensitive"})
 
   law_resource_id = module.law_central.id
   address_space_vnet                = ["10.30.0.0/16"]
@@ -1012,6 +1025,7 @@ module "security_rules_central_sensitive" {
     }
   ]
 }
+
 
 ###################################################################
 # Create the business virtual network manager and its components
