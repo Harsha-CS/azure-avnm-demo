@@ -114,6 +114,33 @@ SSH connections from the trusted jump hosts is allowed because both the security
 
 ![ssh success](../images/d3-ssh-success.png)
 
+## Multiple Azure Virtual Network Managers
+In this scenario one of the organization's business units has requested an Azure Virtual Network Manager instance to use to manage their subscriptions. Central IT must maintain their instance and ensure it takes precedence.
+
+Azure Virtual Network Manager supports multiple instances as long as those instances are applied at different scopes. In the scenario above, Central IT would set the resource scope of their instance high up in the management group structure while business unit would set their resource scope to their subscriptions. 
+
+The architecture is pictured below.
+
+![multiple avnm architecture](../images/d4-arch.png)
+
+The business unit builds an instance with a SecurityAdmin Configuration containing a rule collection that applies to a network group for virtual networks running non-production workloads. The new network group will use Azure Policy to manage the dynamic membership of the group based upon the virtual networks having the tag of environment=nonproduction.
+
+The rule collection contains a single rule that uses the always allow action to allow inbound SSH traffic from all sources. This rule conflicts with Central IT's rule which limits inbound SSH traffic to trusted jump servers. 
+
+The application team deploys the SecurityAdmin Configuration to the relevant Azure regions. 
+
+![avnm rule collections](../images/d4-security-admin-rules.png)
+
+The application team attempts to SSH into one of their non-production virtual networks but the traffic is denied.
+
+![ssh failing with multiple avnms](../images/d4-ssh-fail.png)
+
+The connection fails because when multiple Azure Virtual Network Managers apply to a virtual network, and two security admin rules conflict, the rule from the highest scope applied. In this instance the Central IT instance is applied at a higher level management scope from the business unit instance and the rules limiting the source of SSH traffic take precedence.
+
+
+
+
+
 
 
 
