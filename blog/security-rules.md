@@ -123,7 +123,7 @@ The architecture is pictured below.
 
 ![multiple avnm architecture](../images/d4-arch.png)
 
-The business unit builds an instance with a SecurityAdmin Configuration containing a rule collection that applies to a network group for virtual networks running non-production workloads. The new network group will use Azure Policy to manage the dynamic membership of the group based upon the virtual networks having the tag of environment=nonproduction.
+The business unit builds an instance with a SecurityAdmin Configuration containing a rule collection that applies to a new network group that is local to the new instance for virtual networks running non-production workloads. The new network group will use Azure Policy to manage the dynamic membership of the group based upon the virtual networks having the tag of environment=nonproduction.
 
 The rule collection contains a single rule that uses the always allow action to allow inbound SSH traffic from all sources. This rule conflicts with Central IT's rule which limits inbound SSH traffic to trusted jump servers. 
 
