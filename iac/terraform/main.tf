@@ -114,7 +114,7 @@ module "storage_account_flow_logs_r2" {
 ###################################################################
 
 module "pip_vm1_mgmt" {
-  depends_on = [ 
+  depends_on = [
     azurerm_resource_group.rg_mgmt,
     module.law_central
   ]
@@ -125,11 +125,11 @@ module "pip_vm1_mgmt" {
   resource_group_name = azurerm_resource_group.rg_mgmt.name
 
   law_resource_id = module.law_central.id
-  tags                = local.tags
+  tags            = local.tags
 }
 
 module "pip_vm2_mgmt" {
-  depends_on = [ 
+  depends_on = [
     azurerm_resource_group.rg_mgmt,
     module.law_central
   ]
@@ -140,7 +140,7 @@ module "pip_vm2_mgmt" {
   resource_group_name = azurerm_resource_group.rg_mgmt.name
 
   law_resource_id = module.law_central.id
-  tags                = local.tags
+  tags            = local.tags
 }
 
 module "nsg_mgmt_pri" {
@@ -188,12 +188,12 @@ module "vnet_mgmt" {
 
   tags = local.tags
 
-  law_resource_id = module.law_central.id
-  address_space_vnet                = ["10.250.0.0/16"]
+  law_resource_id    = module.law_central.id
+  address_space_vnet = ["10.250.0.0/16"]
   subnets = [
     {
-      name                 = "snet-pri"
-      address_prefixes     = ["10.250.0.0/24"]
+      name                      = "snet-pri"
+      address_prefixes          = ["10.250.0.0/24"]
       network_security_group_id = module.nsg_mgmt_pri.id
     }
   ]
@@ -209,10 +209,10 @@ module "vm1_mgmt_r1" {
   location            = var.primary_location
   resource_group_name = azurerm_resource_group.rg_mgmt.name
 
-  subnet_id           = module.vnet_mgmt.subnets[index(module.vnet_mgmt.subnets.*.name, "snet-pri")].id
+  subnet_id            = module.vnet_mgmt.subnets[index(module.vnet_mgmt.subnets.*.name, "snet-pri")].id
   public_ip_address_id = module.pip_vm1_mgmt.id
 
-  vm_size             = "Standard_DC1s_v3"
+  vm_size = "Standard_DC1s_v3"
   image_reference = {
     publisher = "Canonical"
     offer     = "0001-com-ubuntu-server-focal"
@@ -221,12 +221,12 @@ module "vm1_mgmt_r1" {
   }
 
   identities = {
-    type          = "UserAssigned"
-    identity_ids  = [module.umi_ama.id]
+    type         = "UserAssigned"
+    identity_ids = [module.umi_ama.id]
   }
-  admin_username      = var.vm_username
-  admin_password      = var.vm_password
-  tags                = local.tags
+  admin_username = var.vm_username
+  admin_password = var.vm_password
+  tags           = local.tags
 }
 
 module "vm2_mgmt_r1" {
@@ -239,10 +239,10 @@ module "vm2_mgmt_r1" {
   location            = var.primary_location
   resource_group_name = azurerm_resource_group.rg_mgmt.name
 
-  subnet_id           = module.vnet_mgmt.subnets[index(module.vnet_mgmt.subnets.*.name, "snet-pri")].id
+  subnet_id            = module.vnet_mgmt.subnets[index(module.vnet_mgmt.subnets.*.name, "snet-pri")].id
   public_ip_address_id = module.pip_vm2_mgmt.id
 
-  vm_size             = "Standard_DC1s_v3"
+  vm_size = "Standard_DC1s_v3"
   image_reference = {
     publisher = "Canonical"
     offer     = "0001-com-ubuntu-server-focal"
@@ -251,12 +251,12 @@ module "vm2_mgmt_r1" {
   }
 
   identities = {
-    type          = "UserAssigned"
-    identity_ids  = [module.umi_ama.id]
+    type         = "UserAssigned"
+    identity_ids = [module.umi_ama.id]
   }
-  admin_username      = var.vm_username
-  admin_password      = var.vm_password
-  tags                = local.tags
+  admin_username = var.vm_username
+  admin_password = var.vm_password
+  tags           = local.tags
 }
 
 ###################################################################
@@ -426,7 +426,7 @@ module "nsgs_pri_r1" {
       protocol                   = "Tcp"
       source_port_range          = "*"
       destination_port_range     = "80"
-      source_address_prefixes    = "*"
+      source_address_prefix      = "*"
       destination_address_prefix = "*"
     },
     {
@@ -485,7 +485,7 @@ module "nsgnp_pri_r1" {
       protocol                   = "Tcp"
       source_port_range          = "*"
       destination_port_range     = "22"
-      source_address_prefixes    = "*"
+      source_address_prefix      = "*"
       destination_address_prefix = "*"
     },
     {
@@ -545,7 +545,7 @@ module "nsgnp_pri_r2" {
       protocol                   = "Tcp"
       source_port_range          = "*"
       destination_port_range     = "22"
-      source_address_prefixes    = "*"
+      source_address_prefix      = "*"
       destination_address_prefix = "*"
     },
     {
@@ -591,12 +591,12 @@ module "vnetp_r1" {
   # Add additional tag to use in Azure Policy demonstration
   tags = merge(local.tags, { env = "prod" })
 
-  law_resource_id = module.law_central.id
-  address_space_vnet                = ["10.0.0.0/16"]
+  law_resource_id    = module.law_central.id
+  address_space_vnet = ["10.0.0.0/16"]
   subnets = [
     {
-      name                 = "snet-pri"
-      address_prefixes     = ["10.0.0.0/24"]
+      name                      = "snet-pri"
+      address_prefixes          = ["10.0.0.0/24"]
       network_security_group_id = module.nsgp_pri_r1.id
     }
   ]
@@ -613,12 +613,12 @@ module "vnetp_r2" {
   # Add additional tag to use in Azure Policy demonstration
   tags = merge(local.tags, { env = "prod" })
 
-  law_resource_id = module.law_central.id
-  address_space_vnet                = ["10.10.0.0/16"]
+  law_resource_id    = module.law_central.id
+  address_space_vnet = ["10.10.0.0/16"]
   subnets = [
     {
-      name                 = "snet-pri"
-      address_prefixes     = ["10.10.0.0/24"]
+      name                      = "snet-pri"
+      address_prefixes          = ["10.10.0.0/24"]
       network_security_group_id = module.nsgp_pri_r2.id
     }
   ]
@@ -631,16 +631,16 @@ module "vnets_r1" {
   name                = "vnets-r1${random_string.unique.result}"
   location            = var.primary_location
   resource_group_name = azurerm_resource_group.rg_s.name
-  tags = merge(local.tags, { 
+  tags = merge(local.tags, {
     env = "prod",
-    classification = "sensitive"})
+  classification = "sensitive" })
 
-  law_resource_id = module.law_central.id
-  address_space_vnet                = ["10.30.0.0/16"]
+  law_resource_id    = module.law_central.id
+  address_space_vnet = ["10.30.0.0/16"]
   subnets = [
     {
-      name                 = "snet-pri"
-      address_prefixes     = ["10.30.0.0/24"]
+      name                      = "snet-pri"
+      address_prefixes          = ["10.30.0.0/24"]
       network_security_group_id = module.nsgs_pri_r1.id
     }
   ]
@@ -657,12 +657,12 @@ module "vnetnp_r1" {
   # Add additional tag to use in Azure Policy demonstration
   tags = merge(local.tags, { env = "nonprod" })
 
-  law_resource_id = module.law_central.id
-  address_space_vnet                = ["10.100.0.0/16"]
+  law_resource_id    = module.law_central.id
+  address_space_vnet = ["10.100.0.0/16"]
   subnets = [
     {
-      name                 = "snet-pri"
-      address_prefixes     = ["10.100.0.0/24"]
+      name                      = "snet-pri"
+      address_prefixes          = ["10.100.0.0/24"]
       network_security_group_id = module.nsgnp_pri_r1.id
     }
   ]
@@ -678,12 +678,12 @@ module "vnetnp_r2" {
   # Add additional tag to use in Azure Policy demonstration
   tags = merge(local.tags, { env = "nonprod" })
 
-  law_resource_id = module.law_central.id
-  address_space_vnet                = ["10.110.0.0/16"]
+  law_resource_id    = module.law_central.id
+  address_space_vnet = ["10.110.0.0/16"]
   subnets = [
     {
-      name                 = "snet-pri"
-      address_prefixes     = ["10.110.0.0/24"]
+      name                      = "snet-pri"
+      address_prefixes          = ["10.110.0.0/24"]
       network_security_group_id = module.nsgnp_pri_r2.id
     }
   ]
@@ -699,12 +699,12 @@ module "avnm_central" {
 
   source              = "./.terraform/modules/network-manager/manager"
   name                = "avnm-central${random_string.unique.result}"
-  description = "The virtual network manager for the central IT team"
+  description         = "The virtual network manager for the central IT team"
   location            = var.primary_location
   resource_group_name = azurerm_resource_group.rg_mgmt.name
-  tags = local.tags
+  tags                = local.tags
 
-  law_resource_id = module.law_central.id
+  law_resource_id          = module.law_central.id
   configurations_supported = ["SecurityAdmin"]
   management_scope = {
     management_group_ids = [var.management_group_id]
@@ -714,19 +714,19 @@ module "avnm_central" {
 module "security_config_central" {
   depends_on = [module.avnm_central]
 
-  source              = "./.terraform/modules/network-manager/security-config"
-  name                = "cfg-sec-prod"
+  source      = "./.terraform/modules/network-manager/security-config"
+  name        = "cfg-sec-prod"
   description = "The security configuration for the production environment"
 
-  network_manager_id = module.avnm_central.id
+  network_manager_id                            = module.avnm_central.id
   apply_on_network_intent_policy_based_services = ["AllowRulesOnly"]
 }
 
 module "network_group_central_prod" {
   depends_on = [module.avnm_central]
 
-  source              = "./.terraform/modules/network-manager/network-group"
-  name                = "ng-prod"
+  source      = "./.terraform/modules/network-manager/network-group"
+  name        = "ng-prod"
   description = "The Network Group for all production virtual networks"
 
   network_manager_id = module.avnm_central.id
@@ -735,8 +735,8 @@ module "network_group_central_prod" {
 module "network_group_central_nonprod" {
   depends_on = [module.avnm_central]
 
-  source              = "./.terraform/modules/network-manager/network-group"
-  name                = "ng-nonprod"
+  source      = "./.terraform/modules/network-manager/network-group"
+  name        = "ng-nonprod"
   description = "The Network Group for all non-production virtual networks"
 
   network_manager_id = module.avnm_central.id
@@ -745,8 +745,8 @@ module "network_group_central_nonprod" {
 module "network_group_central_sensitive" {
   depends_on = [module.avnm_central]
 
-  source              = "./.terraform/modules/network-manager/network-group"
-  name                = "ng-sensitive"
+  source      = "./.terraform/modules/network-manager/network-group"
+  name        = "ng-sensitive"
   description = "The Network Group for all sensitive virtual networks"
 
   network_manager_id = module.avnm_central.id
@@ -758,13 +758,13 @@ module "network_group_central_prod_members" {
     module.vnetp_r1,
     module.vnetp_r2,
     module.vnets_r1
-    ]
+  ]
 
-  source              = "./.terraform/modules/network-manager/static-member"
-  members               = [
-    module.vnetp_r1.id, 
-    module.vnetp_r2.id, 
-    module.vnets_r1.id ]
+  source = "./.terraform/modules/network-manager/static-member"
+  members = [
+    module.vnetp_r1.id,
+    module.vnetp_r2.id,
+  module.vnets_r1.id]
 
   network_group_id = module.network_group_central_prod.id
 }
@@ -773,11 +773,11 @@ module "network_group_central_sensitive_members" {
   depends_on = [
     module.network_group_central_sensitive,
     module.vnets_r1
-    ]
+  ]
 
-  source              = "./.terraform/modules/network-manager/static-member"
-  members               = [
-    module.vnets_r1.id ]
+  source = "./.terraform/modules/network-manager/static-member"
+  members = [
+  module.vnets_r1.id]
 
   network_group_id = module.network_group_central_sensitive.id
 }
@@ -787,13 +787,13 @@ module "network_group_central_nonprod_members" {
     module.network_group_central_nonprod,
     module.vnetnp_r1,
     module.vnetnp_r2
-    ]
+  ]
 
-  source              = "./.terraform/modules/network-manager/static-member"
-  members               = [
-    module.vnetnp_r1.id, 
+  source = "./.terraform/modules/network-manager/static-member"
+  members = [
+    module.vnetnp_r1.id,
     module.vnetnp_r2.id
- ]
+  ]
 
   network_group_id = module.network_group_central_nonprod.id
 }
@@ -804,8 +804,8 @@ module "security_rule_collection_central_prod" {
     module.network_group_central_sensitive_members
   ]
 
-  source              = "./.terraform/modules/network-manager/security-admin-rule-collection"
-  name                = "rc-prod"
+  source                    = "./.terraform/modules/network-manager/security-admin-rule-collection"
+  name                      = "rc-prod"
   security_configuration_id = module.security_config_central.id
   network_group_id = [
     module.network_group_central_prod.id,
@@ -818,8 +818,8 @@ module "security_rule_collection_central_sensitive" {
     module.network_group_central_sensitive_members
   ]
 
-  source              = "./.terraform/modules/network-manager/security-admin-rule-collection"
-  name                = "rc-sensitive"
+  source                    = "./.terraform/modules/network-manager/security-admin-rule-collection"
+  name                      = "rc-sensitive"
   security_configuration_id = module.security_config_central.id
   network_group_id = [
     module.network_group_central_sensitive.id
@@ -831,8 +831,8 @@ module "security_rule_collection_central_nonprod" {
     module.network_group_central_nonprod_members
   ]
 
-  source              = "./.terraform/modules/network-manager/security-admin-rule-collection"
-  name                = "rc-nonprod"
+  source                    = "./.terraform/modules/network-manager/security-admin-rule-collection"
+  name                      = "rc-nonprod"
   security_configuration_id = module.security_config_central.id
   network_group_id = [
     module.network_group_central_nonprod.id
@@ -844,18 +844,18 @@ module "security_rules_central_prod" {
     module.security_rule_collection_central_prod
   ]
 
-  source              = "./.terraform/modules/network-manager/security-admin-rule"
+  source                      = "./.terraform/modules/network-manager/security-admin-rule"
   security_rule_collection_id = module.security_rule_collection_central_prod.id
   security_rules = [
-      {
-      name                       = "AlwaysAllowDns"
-      description                = "Always allow DNS traffic to DNS service"
-      priority                   = 1000
-      direction                  = "Outbound"
-      action                     = "AlwaysAllow"
-      protocol                   = "Any"
-      source_port_ranges         = ["0-65535"]
-      destination_port_ranges    = ["53"]
+    {
+      name                    = "AlwaysAllowDns"
+      description             = "Always allow DNS traffic to DNS service"
+      priority                = 1000
+      direction               = "Outbound"
+      action                  = "AlwaysAllow"
+      protocol                = "Any"
+      source_port_ranges      = ["0-65535"]
+      destination_port_ranges = ["53"]
       source = [
         {
           address_prefix_type = "IPPrefix"
@@ -870,14 +870,14 @@ module "security_rules_central_prod" {
       ]
     },
     {
-      name                       = "AllowSSHFromTrustedNetwork"
-      description                = "Allow SSH from trusted network"
-      priority                   = 2000
-      direction                  = "Inbound"
-      action                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_ranges         = ["0-65535"]
-      destination_port_ranges    = ["22"]
+      name                    = "AllowSSHFromTrustedNetwork"
+      description             = "Allow SSH from trusted network"
+      priority                = 2000
+      direction               = "Inbound"
+      action                  = "Allow"
+      protocol                = "Tcp"
+      source_port_ranges      = ["0-65535"]
+      destination_port_ranges = ["22"]
       source = [
         {
           address_prefix_type = "IPPrefix"
@@ -892,14 +892,14 @@ module "security_rules_central_prod" {
       ]
     },
     {
-      name                       = "DenySshFromAll"
-      description                = "BlockSshFromAll"
-      priority                   = 3000
-      direction                  = "Inbound"
-      action                     = "Deny"
-      protocol                   = "Tcp"
-      source_port_ranges         = ["0-65535"]
-      destination_port_ranges    = ["22"]
+      name                    = "DenySshFromAll"
+      description             = "BlockSshFromAll"
+      priority                = 3000
+      direction               = "Inbound"
+      action                  = "Deny"
+      protocol                = "Tcp"
+      source_port_ranges      = ["0-65535"]
+      destination_port_ranges = ["22"]
       source = [
         {
           address_prefix_type = "IPPrefix"
@@ -921,18 +921,18 @@ module "security_rules_central_nonprod" {
     module.security_rule_collection_central_nonprod
   ]
 
-  source              = "./.terraform/modules/network-manager/security-admin-rule"
+  source                      = "./.terraform/modules/network-manager/security-admin-rule"
   security_rule_collection_id = module.security_rule_collection_central_nonprod.id
   security_rules = [
-      {
-      name                       = "AlwaysAllowDns"
-      description                = "Always allow DNS traffic to DNS service"
-      priority                   = 1100
-      direction                  = "Outbound"
-      action                     = "AlwaysAllow"
-      protocol                   = "Any"
-      source_port_ranges         = ["0-65535"]
-      destination_port_ranges    = ["53"]
+    {
+      name                    = "AlwaysAllowDns"
+      description             = "Always allow DNS traffic to DNS service"
+      priority                = 1100
+      direction               = "Outbound"
+      action                  = "AlwaysAllow"
+      protocol                = "Any"
+      source_port_ranges      = ["0-65535"]
+      destination_port_ranges = ["53"]
       source = [
         {
           address_prefix_type = "IPPrefix"
@@ -947,14 +947,14 @@ module "security_rules_central_nonprod" {
       ]
     },
     {
-      name                       = "AllowSSHFromTrustedNetwork"
-      description                = "Allow SSH from trusted network"
-      priority                   = 2100
-      direction                  = "Inbound"
-      action                     = "Allow"
-      protocol                   = "Tcp"
-      source_port_ranges         = ["0-65535"]
-      destination_port_ranges    = ["22"]
+      name                    = "AllowSSHFromTrustedNetwork"
+      description             = "Allow SSH from trusted network"
+      priority                = 2100
+      direction               = "Inbound"
+      action                  = "Allow"
+      protocol                = "Tcp"
+      source_port_ranges      = ["0-65535"]
+      destination_port_ranges = ["22"]
       source = [
         {
           address_prefix_type = "IPPrefix"
@@ -969,14 +969,14 @@ module "security_rules_central_nonprod" {
       ]
     },
     {
-      name                       = "DenySshFromAll"
-      description                = "BlockSshFromAll"
-      priority                   = 3100
-      direction                  = "Inbound"
-      action                     = "Deny"
-      protocol                   = "Tcp"
-      source_port_ranges         = ["0-65535"]
-      destination_port_ranges    = ["22"]
+      name                    = "DenySshFromAll"
+      description             = "BlockSshFromAll"
+      priority                = 3100
+      direction               = "Inbound"
+      action                  = "Deny"
+      protocol                = "Tcp"
+      source_port_ranges      = ["0-65535"]
+      destination_port_ranges = ["22"]
       source = [
         {
           address_prefix_type = "IPPrefix"
@@ -998,18 +998,18 @@ module "security_rules_central_sensitive" {
     module.security_rule_collection_central_sensitive
   ]
 
-  source              = "./.terraform/modules/network-manager/security-admin-rule"
+  source                      = "./.terraform/modules/network-manager/security-admin-rule"
   security_rule_collection_id = module.security_rule_collection_central_sensitive.id
   security_rules = [
     {
-      name                       = "DenyHttp"
-      description                = "Deny all HTTP traffic"
-      priority                   = 3010
-      direction                  = "Inbound"
-      action                     = "Deny"
-      protocol                   = "Tcp"
-      source_port_ranges         = ["0-65535"]
-      destination_port_ranges    = ["80"]
+      name                    = "DenyHttp"
+      description             = "Deny all HTTP traffic"
+      priority                = 3010
+      direction               = "Inbound"
+      action                  = "Deny"
+      protocol                = "Tcp"
+      source_port_ranges      = ["0-65535"]
+      destination_port_ranges = ["80"]
       source = [
         {
           address_prefix_type = "IPPrefix"
@@ -1038,12 +1038,12 @@ module "avnm_bu" {
 
   source              = "./.terraform/modules/network-manager/manager"
   name                = "avnm-bu${random_string.unique.result}"
-  description = "The virtual network manager for the business unit"
+  description         = "The virtual network manager for the business unit"
   location            = var.primary_location
   resource_group_name = azurerm_resource_group.rg_mgmt.name
-  tags = local.tags
+  tags                = local.tags
 
-  law_resource_id = module.law_central.id
+  law_resource_id          = module.law_central.id
   configurations_supported = ["SecurityAdmin"]
   management_scope = {
     subscription_ids = [data.azurerm_subscription.current_subscription.id]
@@ -1053,19 +1053,19 @@ module "avnm_bu" {
 module "security_config_bu" {
   depends_on = [module.avnm_central]
 
-  source              = "./.terraform/modules/network-manager/security-config"
-  name                = "cfg-sec-prod"
+  source      = "./.terraform/modules/network-manager/security-config"
+  name        = "cfg-sec-prod"
   description = "The security configuration for the production environment"
 
-  network_manager_id = module.avnm_bu.id
+  network_manager_id                            = module.avnm_bu.id
   apply_on_network_intent_policy_based_services = ["AllowRulesOnly"]
 }
 
 module "network_group_bu_prod" {
   depends_on = [module.avnm_central]
 
-  source              = "./.terraform/modules/network-manager/network-group"
-  name                = "ng-prod"
+  source      = "./.terraform/modules/network-manager/network-group"
+  name        = "ng-prod"
   description = "The Network Group for all production virtual networks"
 
   network_manager_id = module.avnm_bu.id
@@ -1074,8 +1074,8 @@ module "network_group_bu_prod" {
 module "network_group_bu_nonprod" {
   depends_on = [module.avnm_central]
 
-  source              = "./.terraform/modules/network-manager/network-group"
-  name                = "ng-nonprod"
+  source      = "./.terraform/modules/network-manager/network-group"
+  name        = "ng-nonprod"
   description = "The Network Group for all non-production virtual networks"
 
   network_manager_id = module.avnm_bu.id
@@ -1089,11 +1089,11 @@ module "network_group_bu_prod_members" {
     module.vnets_r1
   ]
 
-  source              = "./.terraform/modules/network-manager/static-member"
-  members               = [
-    module.vnetp_r1.id, 
-    module.vnetp_r2.id, 
-    module.vnets_r1.id 
+  source = "./.terraform/modules/network-manager/static-member"
+  members = [
+    module.vnetp_r1.id,
+    module.vnetp_r2.id,
+    module.vnets_r1.id
   ]
 
   network_group_id = module.network_group_bu_prod.id
@@ -1106,8 +1106,8 @@ module "network_group_bu_nonprod_members" {
     module.vnetnp_r2
   ]
 
-  source              = "./.terraform/modules/network-manager/static-member"
-  members               = [
+  source = "./.terraform/modules/network-manager/static-member"
+  members = [
     module.vnetnp_r1.id,
     module.vnetnp_r2.id
   ]
@@ -1120,8 +1120,8 @@ module "security_rule_collection_bu_prod" {
     module.network_group_bu_prod_members
   ]
 
-  source              = "./.terraform/modules/network-manager/security-admin-rule-collection"
-  name                = "rc-prod"
+  source                    = "./.terraform/modules/network-manager/security-admin-rule-collection"
+  name                      = "rc-prod"
   security_configuration_id = module.security_config_bu.id
   network_group_id = [
     module.network_group_bu_prod.id
@@ -1133,18 +1133,18 @@ module "security_rules_bu_prod" {
     module.security_rule_collection_bu_prod
   ]
 
-  source              = "./.terraform/modules/network-manager/security-admin-rule"
+  source                      = "./.terraform/modules/network-manager/security-admin-rule"
   security_rule_collection_id = module.security_rule_collection_bu_prod.id
   security_rules = [
-      {
-      name                       = "AllowSshFromAll"
-      description                = "Always allow SSH from all"
-      priority                   = 1000
-      direction                  = "Inbound"
-      action                     = "AlwaysAllow"
-      protocol                   = "Tcp"
-      source_port_ranges         = ["0-65535"]
-      destination_port_ranges    = ["22"]
+    {
+      name                    = "AllowSshFromAll"
+      description             = "Always allow SSH from all"
+      priority                = 1000
+      direction               = "Inbound"
+      action                  = "AlwaysAllow"
+      protocol                = "Tcp"
+      source_port_ranges      = ["0-65535"]
+      destination_port_ranges = ["22"]
       source = [
         {
           address_prefix_type = "IPPrefix"
@@ -1167,7 +1167,7 @@ module "security_rules_bu_prod" {
 ###################################################################
 
 module "pip_p_vm_r1" {
-  depends_on = [ 
+  depends_on = [
     azurerm_resource_group.rg_p,
     module.law_central
   ]
@@ -1178,11 +1178,11 @@ module "pip_p_vm_r1" {
   resource_group_name = azurerm_resource_group.rg_p.name
 
   law_resource_id = module.law_central.id
-  tags                = local.tags
+  tags            = local.tags
 }
 
 module "pip_np_vm_r1" {
-  depends_on = [ 
+  depends_on = [
     azurerm_resource_group.rg_np,
     module.law_central
   ]
@@ -1193,11 +1193,11 @@ module "pip_np_vm_r1" {
   resource_group_name = azurerm_resource_group.rg_np.name
 
   law_resource_id = module.law_central.id
-  tags                = local.tags
+  tags            = local.tags
 }
 
 module "pip_s_vm_r1" {
-  depends_on = [ 
+  depends_on = [
     azurerm_resource_group.rg_s,
     module.law_central
   ]
@@ -1208,7 +1208,7 @@ module "pip_s_vm_r1" {
   resource_group_name = azurerm_resource_group.rg_s.name
 
   law_resource_id = module.law_central.id
-  tags                = local.tags
+  tags            = local.tags
 }
 
 ###################################################################
@@ -1227,10 +1227,10 @@ module "vm_p_r1" {
   location            = var.primary_location
   resource_group_name = azurerm_resource_group.rg_p.name
 
-  subnet_id           = module.vnetp_r1.subnets[index(module.vnetp_r1.subnets.*.name, "snet-pri")].id
+  subnet_id            = module.vnetp_r1.subnets[index(module.vnetp_r1.subnets.*.name, "snet-pri")].id
   public_ip_address_id = module.pip_p_vm_r1.id
 
-  vm_size             = "Standard_DC1s_v3"
+  vm_size = "Standard_DC1s_v3"
   image_reference = {
     publisher = "Canonical"
     offer     = "0001-com-ubuntu-server-focal"
@@ -1239,12 +1239,12 @@ module "vm_p_r1" {
   }
 
   identities = {
-    type          = "UserAssigned"
-    identity_ids  = [module.umi_ama.id]
+    type         = "UserAssigned"
+    identity_ids = [module.umi_ama.id]
   }
-  admin_username      = var.vm_username
-  admin_password      = var.vm_password
-  tags                = local.tags
+  admin_username = var.vm_username
+  admin_password = var.vm_password
+  tags           = local.tags
 }
 
 module "vm_np_r1" {
@@ -1258,10 +1258,10 @@ module "vm_np_r1" {
   location            = var.primary_location
   resource_group_name = azurerm_resource_group.rg_np.name
 
-  subnet_id           = module.vnetnp_r1.subnets[index(module.vnetnp_r1.subnets.*.name, "snet-pri")].id
+  subnet_id            = module.vnetnp_r1.subnets[index(module.vnetnp_r1.subnets.*.name, "snet-pri")].id
   public_ip_address_id = module.pip_np_vm_r1.id
 
-  vm_size             = "Standard_DC1s_v3"
+  vm_size = "Standard_DC1s_v3"
   image_reference = {
     publisher = "Canonical"
     offer     = "0001-com-ubuntu-server-focal"
@@ -1270,12 +1270,12 @@ module "vm_np_r1" {
   }
 
   identities = {
-    type          = "UserAssigned"
-    identity_ids  = [module.umi_ama.id]
+    type         = "UserAssigned"
+    identity_ids = [module.umi_ama.id]
   }
-  admin_username      = var.vm_username
-  admin_password      = var.vm_password
-  tags                = local.tags
+  admin_username = var.vm_username
+  admin_password = var.vm_password
+  tags           = local.tags
 }
 
 module "vm_s_r1" {
@@ -1289,10 +1289,10 @@ module "vm_s_r1" {
   location            = var.primary_location
   resource_group_name = azurerm_resource_group.rg_s.name
 
-  subnet_id           = module.vnets_r1.subnets[index(module.vnets_r1.subnets.*.name, "snet-pri")].id
+  subnet_id            = module.vnets_r1.subnets[index(module.vnets_r1.subnets.*.name, "snet-pri")].id
   public_ip_address_id = module.pip_s_vm_r1.id
 
-  vm_size             = "Standard_DC1s_v3"
+  vm_size = "Standard_DC1s_v3"
   image_reference = {
     publisher = "Canonical"
     offer     = "0001-com-ubuntu-server-focal"
@@ -1301,10 +1301,10 @@ module "vm_s_r1" {
   }
 
   identities = {
-    type          = "UserAssigned"
-    identity_ids  = [module.umi_ama.id]
+    type         = "UserAssigned"
+    identity_ids = [module.umi_ama.id]
   }
-  admin_username      = var.vm_username
-  admin_password      = var.vm_password
-  tags                = local.tags
+  admin_username = var.vm_username
+  admin_password = var.vm_password
+  tags           = local.tags
 }

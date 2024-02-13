@@ -55,3 +55,9 @@ resource "azurerm_subnet_network_security_group_association" "subnet_nsg_associa
   subnet_id                 = "${azurerm_virtual_network.vnet.id}/subnets/${each.value.name}"
   network_security_group_id = each.value.network_security_group_id
 }
+
+# Pause and wait for virtual network information to replication through ARM API
+resource "time_sleep" "wait_10_seconds" {
+  depends_on = [azurerm_subnet.subnet]
+  create_duration = "10s"
+}

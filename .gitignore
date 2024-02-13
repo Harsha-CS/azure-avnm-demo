@@ -6,3 +6,4 @@ modules.json
 terraform.tfstate
 iac/terraform/terraform.tfvars
 .DS_Store
+providers/
