@@ -233,27 +233,63 @@ Attempts to SSH from a trusted virtual machine to Non-Production Workload A is s
 ![ssh success](../images/d3-ssh-success.png)
 
 ## Multiple Azure Virtual Network Managers
-In this scenario one of the organization's business units has requested an Azure Virtual Network Manager instance to use to manage their subscriptions. Central IT must maintain their instance and ensure it takes precedence.
+In this scenario one of the organization's business units has requested an Azure Virtual Network Manager instance to use to manage their subscriptions. Central IT must maintain their instance to ensure compliance with organizational security policy.
 
-Azure Virtual Network Manager supports multiple instances as long as those instances are applied at different scopes. In the scenario above, Central IT would set the resource scope of their instance high up in the management group structure while business unit would set their resource scope to their subscriptions. 
+Azure Virtual Network Manager supports multiple instances as long as those instances are applied at different scopes. In the scenario above, Central IT would set the resource scope of their instance higher up in the management group structure than where the business unit would assign its resource scope.
 
 The architecture is pictured below.
 
 ![multiple avnm architecture](../images/d4-arch.png)
 
-The business unit builds an instance with a SecurityAdmin Configuration containing a rule collection that applies to a new network group that is local to the new instance for virtual networks running non-production workloads. The new network group will use Azure Policy to manage the dynamic membership of the group based upon the virtual networks having the tag of environment=nonproduction.
+The business unit builds an instance with a SecurityAdmin Configuration containing a Rule Collection that applies to a new Network Group in the Network Manager for virtual networks running non-production workloads. The Network Group will use Azure Policy to manage the dynamic membership of the group based upon the virtual networks having the tag of environment=nonproduction. The policy will use similar logic as to the policy seen earlier.
 
-The rule collection contains a single rule that uses the always allow action to allow inbound SSH traffic from all sources. This rule conflicts with Central IT's rule which limits inbound SSH traffic to trusted jump servers. 
+The Rule Collection contains a single Security Admin Rule has been mistakenly configured with the AlwaysAllow action to allow all inbound SSH traffic even if the Network Security Group is configured to block it.
 
 The application team deploys the SecurityAdmin Configuration to the relevant Azure regions. 
 
 ![avnm rule collections](../images/d4-security-admin-rules.png)
 
-The application team attempts to SSH into one of their non-production virtual networks but the traffic is denied.
+An attacker attempts to SSH into a non-production workload from an untrusted machine. The traffic is denied and the attacker is prevented from establishing the session.
 
 ![ssh failing with multiple avnms](../images/d4-ssh-fail.png)
 
-The connection fails because when multiple Azure Virtual Network Managers apply to a virtual network, and two security admin rules conflict, the rule from the highest scope applied. In this instance the Central IT instance is applied at a higher level management scope from the business unit instance and the rules limiting the source of SSH traffic take precedence.
+The connection fails because when multiple Azure Virtual Network Managers apply to a virtual network, and Security Admin Rules between the two instances conflict, the rule from the highest scope applied. In this scenario the Central IT instance is applied at a higher level management scope from the business unit instance so the traffic is blocked because the source of the traffic is an untrusted machine.
+
+## Virtual Network Flow Logs and Azure Virtual Network Manager Security Admin Rules
+
+Organizations frequently have the requirement to log when network traffic is allowed or denied to satisfy regulatory requirements and assist with troubleshooting in day-to-day operations. Traffic that is processed by an Azure Virtual Network Manager Security Admin Rule can be logged using VNet Flow Logs. VNet Flow Logs are a feature of Network Watcher and log information about the IP traffic coming in and out of a virtual network for supported workloads. This includes IP traffic processed by Network Security Groups and Security Admin Rules. It also supports evaluating the encryption status of network traffic if scenarios where virtual network encryption is used.
+
+In this scenario we will explore how to use a VNet Flow Logs to determine if traffic is being blocked by a Security Admin Rule or Network Security Group.
+
+VNet Flow Logs must be enabled on each virtual network. As of the date of this post, VNet Flow Logs are in Public Preview and available in a limited set of regions. You must [sign-up](https://aka.ms/VNetflowlogspreviewsignup) to use the feature. Once onboarded into the preview, the VNet Flow Log must be configured on the virtual network. The logs are delivered to an Azure Storage Account.
+
+In the command below the production virtual network is enabled for VNet Flow Logs.
+
+```
+az network watcher flow-log create --location eastus --name flvnetp-r174188 --resource-group rg-demo-avnm-p74188 --vnet vnetp-r174188 --storage-account "/subscriptions/XXXXXXXX-XXXX-XXXX-XXXXXXXXXXXX/resourceGroups/rg-demo-avnm-mgmt74188/providers/Microsoft.Storage/storageAccounts/stlogsr174188"
+```
+
+After the VNet Flow Logs are enabled, An attempt is made to establish an SSH connection to a workload in the production virtual network from one of the jump hosts in the trusted enclave. The SSH connection times out because it is blocked by either a Security Admin Rule or Network Security Group. 
+
+Let's explore how VNet Flow Logs can be used to determine which type of rule is blocking the traffic.
+
+![scenario 5 ssh fail](../images/d5-ssh-fail.png)
+
+Within the Azure Storage Account a new container has been created named insights-logs-flowlogflowevent. This is the container where VNet Flow Logs are stored.
+
+![storage account with vnet flow logs](../images/d5-az-storage-container.png)
+
+The latest VNet Flow Log is downloaded from the Azure Storage Account and reviewed. Searching for the jump server's IP identifies a flow record for the virtual network the workload is in and at the time the SSH connection was attempted. The aclId property indicates the resources that evaluated the flow. In this case we see that it is a Network Security Group named nsgp-pri-r169341. The rule property indicates the name of the security rule that evaluated the traffic which was named block-all. In the flowTuples array, the highlighted record indicates the SSH traffic from the trusted jump server was denied.
+
+![vnet flow log showing nsg block](../images/d5-nsg-fail.png)
+
+Let's look at another scenario where the application team is having issue doing load testing on their production application. 
+
+The latest VNet Flow Log is again downloaded from the Azure Storage Account. A search for the IP addressed used by the load testing service identifies a flow record for the virtual network the workload is in at the time the testing was performed Here the aclId property indicates the Network Manager Security Configuration with a Rule Collected named rc-prod evaluated the traffic. The traffic from the load testing service was denied by a rule named DenyHttp.
+
+![vnet flow log showing security admin rule block](../images/d5-http-fail.png)
+
+
 
 
 
