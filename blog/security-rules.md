@@ -257,11 +257,11 @@ The connection fails because when multiple Network Managers apply to a virtual n
 
 ## Virtual Network Flow Logs and Azure Virtual Network Manager Security Admin Rules
 
-Organizations frequently have the requirement to log when network traffic is allowed or denied to satisfy regulatory requirements and assist with troubleshooting in day-to-day operations. Traffic that is processed by an Azure Virtual Network Manager Security Admin Rule can be logged using VNet Flow Logs. VNet Flow Logs are a feature of Network Watcher and log information about the IP traffic coming in and out of a virtual network for supported workloads. This includes IP traffic processed by Network Security Groups and Security Admin Rules. It also supports evaluating the encryption status of network traffic if scenarios where virtual network encryption is used.
+Organizations frequently have the requirement to log when network traffic is allowed or denied to satisfy regulatory requirements and assist with troubleshooting in day-to-day operations. Traffic that is processed by an Azure Virtual Network Manager Security Admin Rule can be logged using [VNet Flow Logs](https://learn.microsoft.com/en-us/azure/network-watcher/vnet-flow-logs-overview). VNet Flow Logs are a feature of Network Watcher and log information about the IP traffic coming in and out of a virtual network for supported workloads. This includes IP traffic processed by Network Security Groups and Security Admin Rules. It also supports evaluating the encryption status of network traffic if scenarios where virtual network encryption is used.
 
 In this scenario we will explore how to use a VNet Flow Logs to determine if traffic is being blocked by a Security Admin Rule or Network Security Group.
 
-VNet Flow Logs must be enabled on each virtual network. As of the date of this post, VNet Flow Logs are in Public Preview and available in a limited set of regions. You must [sign-up](https://aka.ms/VNetflowlogspreviewsignup) to use the feature. Once onboarded into the preview, the VNet Flow Log must be configured on the virtual network. The logs are delivered to an Azure Storage Account.
+VNet Flow Logs must be enabled on each virtual network. As of the date of this post, VNet Flow Logs are in Public Preview and available in a limited set of regions. Once onboarded into the preview, the VNet Flow Log must be configured on the virtual network. The logs are delivered to an Azure Storage Account.
 
 In the command below the production virtual network is enabled for VNet Flow Logs.
 
